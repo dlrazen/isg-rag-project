@@ -1,6 +1,39 @@
-.env
+
+# Python
 __pycache__/
-*.pyc
-venv/
+*.py[cod]
+*.pyo
+
+# Virtual environments
 .venv/
-vector_db/
+.venv312/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data
+data/raw/
+data/processed/
+data/chunks/
+data/embeddings/
+data/qdrant/
+
+# Model cache
+.cache/
+models/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp

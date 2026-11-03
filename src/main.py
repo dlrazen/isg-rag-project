@@ -113,61 +113,42 @@ def save_document(document):
 
 
 def main():
+    parser = argparse.ArgumentParser()
 
-    documents = load_documents(RAW_DIR)
+    parser.add_argument(
+        "--experiment",
+        type=str,
+        help="İşlenecek deneyin adı. Belirtilmezse tüm deneyler işlenir."
+    )
 
-    print("=" * 50)
-    print("ISG RAG - DOCUMENT EXTRACTION")
-    print("=" * 50)
+    args = parser.parse_args()
 
-    print(f"Found documents: {len(documents)}")
+    if args.experiment:
+        experiments = [args.experiment]
+    else:
+        experiments = sorted(
+            d.name for d in CHUNKS_DIR.iterdir()
+            if d.is_dir()
+            and not (OUTPUT_DIR / d.name).exists()
+        )
 
-    successful = 0
-    failed = 0
-    ocr_candidates = []
+    print("BGE-M3 modeli yükleniyor...")
 
-    for file_path in documents:
+    model = SentenceTransformer(
+        MODEL_NAME,
+        device="cpu"
+    )
 
-        try:
-            document = process_document(file_path)
+    model.max_seq_length = 512
 
-            output_path = save_document(document)
+    print("Model hazır.")
 
-            successful += 1
+    for experiment in experiments:
+        process_experiment(model, experiment)
 
-            if document["needs_ocr"]:
-                ocr_candidates.append(file_path.name)
-
-            print(
-                f"Saved: {output_path.name}"
-            )
-
-            if document["needs_ocr"]:
-                print("WARNING: Empty pages detected. OCR may be needed.")
-
-        except Exception as error:
-
-            failed += 1
-
-            print(
-                f"ERROR: {file_path.name}: {error}"
-            )
-
-    print("\n" + "=" * 50)
-    print("EXTRACTION SUMMARY")
-    print("=" * 50)
-
-    print(f"Total documents: {len(documents)}")
-    print(f"Successful: {successful}")
-    print(f"Failed: {failed}")
-    print(f"OCR candidates: {len(ocr_candidates)}")
-
-    if ocr_candidates:
-        print("\nFiles requiring OCR inspection:")
-
-        for name in ocr_candidates:
-            print(f"- {name}")
+    print("\nTüm embedding işlemleri tamamlandı!")
 
 
 if __name__ == "__main__":
     main()
+
